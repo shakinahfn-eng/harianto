@@ -2,4 +2,4 @@
 
 Game Kelas12
 
-https://github.com/shakinahfn-eng/harianto/mesin-game-12tsm.html
+https://shakinahfn-eng.github.io/harianto/Qwen_html_20260928_7mzqwkawl.html
