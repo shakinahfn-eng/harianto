@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Perjalanan Motor - Belajar Komponen Kopling</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body { background: #1a1a2e; overflow: hidden; }
+
+  #gameContainer {
+    width: 100vw; height: 100vh;
+    position: relative; overflow: hidden;
+  }
+
+  /* SKY */
+  .sky {
+    position: absolute; top: 0; left: 0; width: 100%; height: 70%;
+    background: linear-gradient(to bottom, #87CEEB 0%, #FFB88C 60%, #FFA07A 100%);
+  }
+  .sun {
+    position: absolute; top: 50px; right: 100px;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: radial-gradient(circle, #FFEB3B, #FF9800);
+    box-shadow: 0 0 60px #FFEB3B;
+  }
+  .cloud {
+    position: absolute; background: white; border-radius: 50px;
+    opacity: 0.8;
+  }
+  .cloud1 { top: 80px; left: 10%; width: 120px; height: 30px; animation: cloudMove 30s linear infinite; }
+  .cloud2 { top: 150px; left: 40%; width: 160px; height: 40px; animation: cloudMove 45s linear infinite; }
+
+  @keyframes cloudMove {
+    from { transform: translateX(0); }
+    to { transform: translateX(-120vw); }
+  }
+
+  /* MOUNTAINS */
+  .mountains {
+    position: absolute; bottom: 30%; width: 200%; height: 200px;
+    background:
+      linear-gradient(135deg, transparent 33%, #6B8E23 33%, #6B8E23 66%, transparent 66%) 0 0/300px 200px,
+      linear-gradient(45deg, transparent 33%, #556B2F 33%, #556B2F 66%, transparent 66%) 150px 0/300px 200px;
+    animation: bgScroll 20s linear infinite;
+  }
+
+  /* TREES */
+  .trees {
+    position: absolute; bottom: 30%; width: 200%; height: 150px;
+    background:
+      radial-gradient(circle at 50px 100px, #228B22 40px, transparent 41px),
+      radial-gradient(circle at 150px 110px, #2E8B57 35px, transparent 36px),
+      radial-gradient(circle at 250px 105px, #228B22 45px, transparent 46px),
+      radial-gradient(circle at 350px 115px, #2E8B57 38px, transparent 39px);
+    background-size: 400px 150px;
+    animation: bgScroll 8s linear infinite;
+  }
+
+  /* ROAD */
+  .road {
+    position: absolute; bottom: 0; width: 100%; height: 30%;
+    background: linear-gradient(to bottom, #555 0%, #333 100%);
+  }
+  .road-line {
+    position: absolute; top: 50%; left: 0; width: 200%; height: 8px;
+    background: repeating-linear-gradient(to right, #FFD700 0 60px, transparent 60px 120px);
+    animation: roadScroll 1s linear infinite;
+  }
+
+  @keyframes bgScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes roadScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-120px); }
+  }
+
+  /* MOTORCYCLE */
+  #motorcycle {
+    position: absolute; bottom: 20%; left: 15%;
+    width: 180px; height: 120px;
+    transition: transform 0.3s;
+    z-index: 10;
+  }
+  #motorcycle.shake { animation: shake 0.5s; }
+  #motorcycle.mogok { filter: grayscale(0.7); }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    25% { transform: translateX(-5px) rotate(-2deg); }
+    75% { transform: translateX(5px) rotate(2deg); }
+  }
+
+  .wheel {
+    position: absolute; bottom: 0; width: 50px; height: 50px;
+    border-radius: 50%; background: #222;
+    border: 5px solid #444;
+  }
+  .wheel::before {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #888; transform: translate(-50%, -50%);
+  }
+  .wheel-front { right: 10px; }
+  .wheel-back { left: 10px; }
+  .wheel.spinning { animation: spin 0.3s linear infinite; }
+  @keyframes spin {
+    from { transform: rotate(0); }
+    to { transform: rotate(360deg); }
+  }
+
+  .body-bike {
+    position: absolute; bottom: 25px; left: 30px;
+    width: 120px; height: 50px;
+    background: linear-gradient(to bottom, #E63946, #C1121F);
+    border-radius: 20px 40px 10px 10px;
+  }
+  .seat {
+    position: absolute; bottom: 70px; left: 50px;
+    width: 70px; height: 15px;
+    background: #1a1a1a; border-radius: 10px;
+  }
+  .handle {
+    position: absolute; bottom: 80px; right: 20px;
+    width: 8px; height: 40px;
+    background: #333; transform: rotate(-20deg);
+  }
+  .headlight {
+    position: absolute; bottom: 55px; right: 5px;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: #FFEB3B; box-shadow: 0 0 15px #FFEB3B;
+  }
+  .rider {
+    position: absolute; bottom: 75px; left: 65px;
+    width: 35px; height: 50px;
+    background: linear-gradient(to bottom, #1D3557 50%, #457B9D 50%);
+    border-radius: 15px 15px 5px 5px;
+  }
+  .rider::before {
+    content: ''; position: absolute; top: -20px; left: 5px;
+    width: 25px; height: 25px; border-radius: 50%;
+    background: #F4A261;
+  }
+  .rider::after {
+    content: ''; position: absolute; top: -25px; left: 2px;
+    width: 30px; height: 15px; border-radius: 50% 50% 0 0;
+    background: #E63946;
+  }
+
+  /* SMOKE */
+  .smoke {
+    position: absolute; bottom: 40%; left: 10%;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(100,100,100,0.7);
+    opacity: 0;
+  }
+  .smoke.active { animation: smokeAnim 2s infinite; }
+  @keyframes smokeAnim {
+    0% { opacity: 0.8; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(-50px,-80px) scale(3); }
+  }
+
+  /* HUD */
+  #hud {
+    position: absolute; top: 20px; left: 20px; right: 20px;
+    display: flex; justify-content: space-between;
+    z-index: 20; color: white;
+    background: rgba(0,0,0,0.5); padding: 15px 25px;
+    border-radius: 15px; backdrop-filter: blur(5px);
+  }
+  .hud-item { text-align: center; }
+  .hud-label { font-size: 12px; opacity: 0.8; }
+  .hud-value { font-size: 22px; font-weight: bold; }
+
+  /* PROGRESS BAR */
+  #progressContainer {
+    position: absolute; top: 100px; left: 20px; right: 20px;
+    height: 25px; background: rgba(0,0,0,0.5);
+    border-radius: 15px; overflow: hidden; z-index: 20;
+    border: 2px solid #FFD700;
+  }
+  #progressBar {
+    height: 100%; width: 0%;
+    background: linear-gradient(to right, #4CAF50, #8BC34A, #FFEB3B);
+    transition: width 0.5s;
+    position: relative;
+  }
+  #progressBar::after {
+    content: '🏁'; position: absolute; right: -5px; top: -5px;
+    font-size: 25px;
+  }
+  #progressText {
+    position: absolute; top: 100px; left: 0; right: 0;
+    text-align: center; color: white; font-weight: bold;
+    line-height: 25px; z-index: 21; font-size: 14px;
+    text-shadow: 1px 1px 2px black;
+  }
+
+  /* QUESTION PANEL */
+  #questionPanel {
+    position: absolute; bottom: 30px; left: 50%;
+    transform: translateX(-50%);
+    width: 90%; max-width: 700px;
+    background: rgba(255,255,255,0.97);
+    border-radius: 20px; padding: 25px;
+    z-index: 30; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    border: 3px solid #E63946;
+  }
+  #questionNumber {
+    color: #E63946; font-weight: bold; font-size: 14px;
+    margin-bottom: 8px;
+  }
+  #questionText {
+    font-size: 18px; color: #1a1a2e;
+    margin-bottom: 20px; line-height: 1.5;
+    font-weight: 500;
+  }
+  .options { display: grid; gap: 10px; }
+  .option-btn {
+    padding: 14px 20px; background: #f0f0f0;
+    border: 2px solid #ddd; border-radius: 12px;
+    cursor: pointer; font-size: 15px; text-align: left;
+    transition: all 0.2s; color: #333;
+  }
+  .option-btn:hover {
+    background: #E63946; color: white;
+    border-color: #C1121F; transform: translateX(5px);
+  }
+  .option-btn.correct {
+    background: #4CAF50; color: white; border-color: #2E7D32;
+  }
+  .option-btn.wrong {
+    background: #f44336; color: white; border-color: #c62828;
+  }
+  .option-btn:disabled { cursor: not-allowed; }
+
+  #feedback {
+    margin-top: 15px; padding: 12px;
+    border-radius: 10px; font-size: 14px;
+    display: none;
+  }
+  #feedback.correct { background: #C8E6C9; color: #1B5E20; display: block; }
+  #feedback.wrong { background: #FFCDD2; color: #B71C1C; display: block; }
+
+  #nextBtn {
+    margin-top: 15px; padding: 12px 30px;
+    background: #E63946; color: white;
+    border: none; border-radius: 10px;
+    font-size: 16px; font-weight: bold;
+    cursor: pointer; display: none;
+    transition: background 0.2s;
+  }
+  #nextBtn:hover { background: #C1121F; }
+
+  /* START SCREEN */
+  #startScreen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100; color: white; text-align: center;
+    padding: 20px;
+  }
+  #startScreen h1 {
+    font-size: 48px; margin-bottom: 10px;
+    background: linear-gradient(to right, #FFD700, #FF6B6B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  #startScreen h2 { font-size: 22px; margin-bottom: 30px; opacity: 0.9; }
+  #startScreen p { max-width: 600px; margin-bottom: 15px; line-height: 1.6; opacity: 0.85; }
+  #startBtn {
+    margin-top: 20px; padding: 18px 50px;
+    background: linear-gradient(to right, #FF6B6B, #FFD700);
+    color: #1a1a2e; border: none; border-radius: 30px;
+    font-size: 20px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 5px 20px rgba(255,215,0,0.4);
+    transition: transform 0.2s;
+  }
+  #startBtn:hover { transform: scale(1.05); }
+
+  /* END SCREEN */
+  #endScreen {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    z-index: 100; color: white; text-align: center; padding: 20px;
+  }
+  #endScreen.show { display: flex; }
+  #endScreen h1 { font-size: 50px; margin-bottom: 20px; }
+  #endScreen .result-box {
+    background: rgba(255,255,255,0.1); padding: 30px;
+    border-radius: 20px; margin: 20px; max-width: 500px;
+    border: 2px solid #FFD700;
+  }
+  #endScreen .stat { margin: 10px 0; font-size: 18px; }
+  #restartBtn {
+    margin-top: 20px; padding: 15px 40px;
+    background: #4CAF50; color: white;
+    border: none; border-radius: 25px;
+    font-size: 18px; font-weight: bold; cursor: pointer;
+  }
+  #restartBtn:hover { background: #388E3C; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <!-- Background -->
+  <div class="sky">
+    <div class="sun"></div>
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+  </div>
+  <div class="mountains"></div>
+  <div class="trees"></div>
+  <div class="road">
+    <div class="road-line"></div>
+  </div>
+
+  <!-- Smoke -->
+  <div class="smoke" id="smoke1"></div>
+  <div class="smoke" id="smoke2"></div>
+  <div class="smoke" id="smoke3"></div>
+
+  <!-- Motorcycle -->
+  <div id="motorcycle">
+    <div class="rider"></div>
+    <div class="handle"></div>
+    <div class="headlight"></div>
+    <div class="seat"></div>
+    <div class="body-bike"></div>
+    <div class="wheel wheel-back spinning"></div>
+    <div class="wheel wheel-front spinning"></div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-item">
+      <div class="hud-label">BENAR</div>
+      <div class="hud-value" id="correctCount" style="color:#4CAF50">0</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">SALAH</div>
+      <div class="hud-value" id="wrongCount" style="color:#f44336">0</div>
+    </div>
+    <div class="hud-item">
+      <div class="hud-label">SKOR</div>
+      <div class="hud-value" id="score" style="color:#FFD700">0</div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div id="progressContainer">
+    <div id="progressBar"></div>
+  </div>
+  <div id="progressText">0 / 30</div>
+
+  <!-- Question Panel -->
+  <div id="questionPanel" class="hidden">
+    <div id="questionNumber">Pertanyaan 1 dari 30</div>
+    <div id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div id="feedback"></div>
+    <button id="nextBtn">Lanjut Perjalanan →</button>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="startScreen">
+    <h1>🏍️ Perjalanan Motor</h1>
+    <h2>Belajar Komponen Kopling Sepeda Motor</h2>
+    <p><strong>Selamat datang, Siswa SMK Kelas 10!</strong></p>
+    <p>Kamu akan berkendara menuju tujuan dengan menjawab <strong>30 pertanyaan</strong> seputar komponen kopling sepeda motor.</p>
+    <p>✅ Jawaban <strong>BENAR</strong> → Motor melaju kencang!</p>
+    <p>❌ Jawaban <strong>SALAH</strong> → Motor MOGOK! (Asap mengepul 🚭)</p>
+    <p>Jawab semua pertanyaan dengan benar untuk sampai di tujuan!</p>
+    <button id="startBtn">🚀 MULAI PERJALANAN</button>
+  </div>
+
+  <!-- End Screen -->
+  <div id="endScreen">
+    <h1 id="endTitle">🏁 SELESAI!</h1>
+    <div class="result-box">
+      <div class="stat">✅ Jawaban Benar: <span id="finalCorrect">0</span></div>
+      <div class="stat">❌ Jawaban Salah: <span id="finalWrong">0</span></div>
+      <div class="stat">🏆 Skor Akhir: <span id="finalScore">0</span></div>
+      <div class="stat" id="finalMessage" style="margin-top:20px;font-weight:bold;"></div>
+    </div>
+    <button id="restartBtn">🔄 Main Lagi</button>
+  </div>
+</div>
+
+<script>
+// ============ DATA 30 PERTANYAAN KOPILING ============
+const questions = [
+  {
+    q: "Apa fungsi utama kopling pada sepeda motor?",
+    options: [
+      "Mengubah energi bahan bakar menjadi gerak",
+      "Memutus dan menyambung putaran mesin ke transmisi",
+      "Mendinginkan mesin saat bekerja",
+      "Mengatur bahan bakar yang masuk ke ruang bakar"
+    ],
+    correct: 1,
+    explain: "Kopling berfungsi untuk memutus dan menyambung putaran dari mesin ke transmisi secara halus."
+  },
+  {
+    q: "Komponen kopling yang berfungsi menjepit plat kopling adalah...",
+    options: ["Rumah kopling", "Pegas kopling (clutch spring)", "Kampas kopling", "Poros input"],
+    correct: 1,
+    explain: "Pegas kopling menekan plat-plat kopling sehingga terjadi gesekan dan putaran tersalur."
+  },
+  {
+    q: "Jenis kopling yang bekerja otomatis berdasarkan putaran mesin disebut...",
+    options: ["Kopling manual", "Kopling ganda", "Kopling sentrifugal", "Kopling hidrolik"],
+    correct: 2,
+    explain: "Kopling sentrifugal menggunakan gaya sentrifugal dari rumah kopling yang berputar untuk menjepit kampas."
+  },
+  {
+    q: "Kopling ganda (double clutch) pada sepeda motor terletak pada...",
+    options: ["Antara mesin dan roda belakang", "Antara mesin dengan transmisi dan antara transmisi dengan roda", "Di dalam karburator", "Pada sistem rem"],
+    correct: 1,
+    explain: "Kopling ganda terdiri dari kopling primer (mesin-transmisi) dan kopling sekunder (transmisi-roda)."
+  },
+  {
+    q: "Plat kopling (clutch plate) umumnya terbuat dari bahan...",
+    options: ["Karet lunak", "Baja yang dilapisi bahan gesek", "Plastik keras", "Kayu lapis"],
+    correct: 1,
+    explain: "Plat kopling terbuat dari baja dengan lapisan bahan gesek (friction material) di kedua sisinya."
+  },
+  {
+    q: "Jika kopling selip saat motor digas, kemungkinan penyebabnya adalah...",
+    options: ["Pegas kopling terlalu kuat", "Kampas kopling aus/ habis", "Oli terlalu banyak", "Tuas kopling terlalu berat"],
+    correct: 1,
+    explain: "Kampas kopling yang aus mengurangi daya jepit sehingga putaran tidak tersalur sempurna (selip)."
+  },
+  {
+    q: "Jarak bebas (free play) tuas kopling yang normal pada motor adalah...",
+    options: ["1-5 mm", "10-20 mm", "30-40 mm", "50-60 mm"],
+    correct: 1,
+    explain: "Jarak bebas tuas kopling yang ideal adalah 10-20 mm agar kopling bekerja optimal."
+  },
+  {
+    q: "Kopling manual pada sepeda motor menggunakan penggerak...",
+    options: ["Otomatis sentrifugal", "Tuas tangan (hand lever) via kabel", "Tekanan oli hidrolik", "Vakum mesin"],
+    correct: 1,
+    explain: "Kopling manual dioperasikan oleh pengendara melalui tuas di stang yang menarik kabel baja."
+  },
+  {
+    q: "Komponen yang meneruskan putaran dari crankshaft ke rumah kopling adalah...",
+    options: ["Rantai kopling (clutch chain/gear)", "Busi", "Karburator", "Aki"],
+    correct: 0,
+    explain: "Rantai kopling atau gear penghubung meneruskan putaran dari crankshaft ke primary drive gear."
+  },
+  {
+    q: "Saat tuas kopling ditarik, apa yang terjadi pada komponen kopling?",
+    options: [
+      "Pegas menekan plat lebih kuat",
+      "Pegas tertekan sehingga plat kopling terlepas dan putaran terputus",
+      "Kampas kopling terbakar",
+      "Oli mengalir ke ruang bakar"
+    ],
+    correct: 1,
+    explain: "Menarik tuas kopling akan menekan pegas melalui push rod, sehingga plat kopling terlepas dan putaran terputus."
+  },
+  {
+    q: "Kopling sentrifugal banyak digunakan pada sepeda motor jenis...",
+    options: ["Motor sport manual", "Motor bebek dan matic", "Motor trail besar", "Motor custom"],
+    correct: 1,
+    explain: "Motor bebek dan matic menggunakan kopling sentrifugal karena tidak memerlukan tuas tangan."
+  },
+  {
+    q: "Bahan plat kopling yang aus akan menyebabkan...",
+    options: [
+      "Motor semakin kencang",
+      "Kopling selip dan tenaga tidak tersalur",
+      "Mesin lebih dingin",
+      "Konsumsi BBM irit"
+    ],
+    correct: 1,
+    explain: "Plat aus mengurangi daya gesek sehingga kopling selip dan tenaga mesin tidak tersalur ke roda."
+  },
+  {
+    q: "Fungsi kampas kopling (friction plate) adalah...",
+    options: [
+      "Memutus arus listrik",
+      "Menyediakan permukaan gesek untuk menyalurkan putaran",
+      "Mendinginkan oli mesin",
+      "Menyaring udara masuk"
+    ],
+    correct: 1,
+    explain: "Kampas kopling memiliki permukaan gesek yang menempel pada plat baja untuk menyalurkan putaran."
+  },
+  {
+    q: "Clutch hub (naf kopling) berfungsi untuk...",
+    options: [
+      "Menahan plat kopling agar ikut berputar bersama rumah kopling",
+      "Mendinginkan kopling",
+      "Mengatur suplai bensin",
+      "Memutar roda belakang"
+    ],
+    correct: 0,
+    explain: "Clutch hub menahan plat kopling melalui giginya agar berputar seirama dengan rumah kopling."
+  },
+  {
+    q: "Penyebab kopling tidak mau lepas (tidak bebas) saat tuas ditarik adalah...",
+    options: [
+      "Kabel kopling terlalu longgar",
+      "Kabel kopling putus atau jarak bebas terlalu kecil",
+      "Oli mesin terlalu sedikit",
+      "Ban kempes"
+    ],
+    correct: 1,
+    explain: "Kabel putus atau jarak bebas terlalu kecil membuat pegas tidak tertekan penuh, kopling tidak bebas."
+  },
+  {
+    q: "Oli mesin berpengaruh pada kopling karena...",
+    options: [
+      "Oli mendinginkan kampas kopling pada kopling basah",
+      "Oli membakar kopling",
+      "Oli tidak berpengaruh sama sekali",
+      "Oli membuat kopling berkarat"
+    ],
+    correct: 0,
+    explain: "Pada kopling basah, oli berfungsi mendinginkan dan melumasi komponen kopling agar tidak cepat aus."
+  },
+  {
+    q: "Kopling ganda pada motor bebek terdiri dari...",
+    options: [
+      "Kopling primer dan kopling sekunder",
+      "Kopling depan dan kopling belakang",
+      "Kopling basah dan kopling kering",
+      "Kopling tunggal dobel"
+    ],
+    correct: 0,
+    explain: "Kopling ganda terdiri dari kopling primer (di mesin) dan kopling sekunder (sentrifugal di roda)."
+  },
+  {
+    q: "Jika jarak bebas tuas kopling terlalu besar, akibatnya...",
+    options: [
+      "Kopling selip terus",
+      "Kopling tidak bebas penuh saat ditarik, sulit memindah gigi",
+      "Motor melaju sendiri",
+      "Mesin overheat"
+    ],
+    correct: 1,
+    explain: "Jarak bebas terlalu besar membuat tarikan tuas tidak cukup menekan pegas, kopling tidak bebas penuh."
+  },
+  {
+    q: "Jika jarak bebas tuas kopling terlalu kecil/ tidak ada, akibatnya...",
+    options: [
+      "Kopling jadi lebih ringan",
+      "Kopling selip karena pegas tidak menekan maksimal",
+      "Motor lebih irit BBM",
+      "Tenaga motor bertambah"
+    ],
+    correct: 1,
+    explain: "Jarak bebas terlalu kecil membuat pegas selalu tertekan sebagian, daya jepit berkurang → kopling selip."
+  },
+  {
+    q: "Komponen yang menghubungkan rumah kopling dengan poros input transmisi adalah...",
+    options: [
+      "Clutch center gear / spline",
+      "Busi",
+      "Piston",
+      "Karburator"
+    ],
+    correct: 0,
+    explain: "Clutch center memiliki spline/gigi yang menyalurkan putaran ke poros input transmisi."
+  },
+  {
+    q: "Prinsip kerja kopling secara umum adalah...",
+    options: [
+      "Menggunakan gaya magnet",
+      "Menggunakan gaya gesek antara dua permukaan yang berputar",
+      "Menggunakan tekanan udara",
+      "Menggunakan energi listrik"
+    ],
+    correct: 1,
+    explain: "Kopling bekerja berdasarkan gaya gesek antara plat kopling dan kampas kopling."
+  },
+  {
+    q: "Pada kopling basah, komponen kopling direndam dalam...",
+    options: ["Air radiator", "Oli mesin", "Bahan bakar", "Air aki"],
+    correct: 1,
+    explain: "Kopling basah bekerja di dalam rendaman oli mesin untuk pendinginan dan pelumasan."
+  },
+  {
+    q: "Keuntungan kopling basah dibandingkan kopling kering adalah...",
+    options: [
+      "Lebih ringan",
+      "Lebih awet dan tidak cepat aus karena terlumasi oli",
+      "Lebih murah",
+      "Tidak perlu perawatan"
+    ],
+    correct: 1,
+    explain: "Oli pada kopling basah mendinginkan dan melumasi sehingga kampas lebih awet dan tidak cepat aus."
+  },
+  {
+    q: "Kerugian kopling basah adalah...",
+    options: [
+      "Terlalu cepat panas",
+      "Ada sebagian tenaga mesin hilang karena gesekan dengan oli (power loss)",
+      "Tidak bisa digunakan di motor sport",
+      "Membutuhkan bahan bakar khusus"
+    ],
+    correct: 1,
+    explain: "Gesekan dengan oli menyebabkan sebagian tenaga mesin hilang (power loss) meski kecil."
+  },
+  {
+    q: "Kopling kering biasanya menggunakan...",
+    options: [
+      "Rendaman oli",
+      "Pegas diafragma dan tidak direndam oli",
+      "Air pendingin",
+      "Tekanan udara"
+    ],
+    correct: 1,
+    explain: "Kopling kering bekerja tanpa rendaman oli, biasanya menggunakan pegas diafragma seperti pada mobil."
+  },
+  {
+    q: "Primary drive gear berfungsi untuk...",
+    options: [
+      "Meneruskan putaran crankshaft ke rumah kopling",
+      "Mengatur pengapian",
+      "Mendinginkan mesin",
+      "Mengatur suplai bahan bakar"
+    ],
+    correct: 0,
+    explain: "Primary drive gear meneruskan putaran dari crankshaft ke clutch housing (rumah kopling)."
+  },
+  {
+    q: "Push rod pada sistem kopling berfungsi untuk...",
+    options: [
+      "Menekan pegas kopling saat tuas ditarik",
+      "Mengalirkan oli ke mesin",
+      "Memutar roda",
+      "Mendinginkan kampas"
+    ],
+    correct: 0,
+    explain: "Push rod (batang penekan) meneruskan gaya dari tuas untuk menekan pegas kopling melalui pressure plate."
+  },
+  {
+    q: "Clutch housing (rumah kopling) berfungsi sebagai...",
+    options: [
+      "Tempat menampung oli saja",
+      "Wadah komponen kopling dan penerus putaran dari primary gear",
+      "Tempat busi",
+      "Pengatur bahan bakar"
+    ],
+    correct: 1,
+    explain: "Rumah kopling menampung seluruh komponen kopling dan meneruskan putaran dari primary drive gear."
+  },
+  {
+    q: "Tanda-tanda kopling motor perlu diganti adalah...",
+    options: [
+      "Motor semakin kencang",
+      "Kopling selip, sulit pindah gigi, dan tarikan berat",
+      "Motor lebih irit BBM",
+      "Suara mesin semakin halus"
+    ],
+    correct: 1,
+    explain: "Kopling selip, sulit pindah gigi, dan tarikan berat adalah tanda kampas kopling sudah aus."
+  },
+  {
+    q: "Langkah yang benar sebelum menyalakan motor dengan kopling manual adalah...",
+    options: [
+      "Gas pol tanpa menarik kopling",
+      "Tarik tuas kopling penuh lalu masukkan gigi 1, lepas kopling perlahan sambil gas",
+      "Langsung lepas tuas kopling",
+      "Tekan pedal rem dulu"
+    ],
+    correct: 1,
+    explain: "Urutan benar: tarik kopling penuh → masukkan gigi → lepas kopling perlahan sambil buka gas."
+  }
+];
+
+// ============ GAME STATE ============
+let currentQ = 0;
+let correct = 0;
+let wrong = 0;
+let score = 0;
+let motorcyclePos = 15; // percent from left
+let isMogok = false;
+
+// ============ DOM ELEMENTS ============
+const startScreen = document.getElementById('startScreen');
+const startBtn = document.getElementById('startBtn');
+const questionPanel = document.getElementById('questionPanel');
+const questionNumber = document.getElementById('questionNumber');
+const questionText = document.getElementById('questionText');
+const optionsContainer = document.getElementById('optionsContainer');
+const feedback = document.getElementById('feedback');
+const nextBtn = document.getElementById('nextBtn');
+const correctCountEl = document.getElementById('correctCount');
+const wrongCountEl = document.getElementById('wrongCount');
+const scoreEl = document.getElementById('score');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const motorcycle = document.getElementById('motorcycle');
+const endScreen = document.getElementById('endScreen');
+const restartBtn = document.getElementById('restartBtn');
+const smokes = [document.getElementById('smoke1'), document.getElementById('smoke2'), document.getElementById('smoke3')];
+
+// ============ START GAME ============
+startBtn.addEventListener('click', () => {
+  startScreen.classList.add('hidden');
+  questionPanel.classList.remove('hidden');
+  showQuestion();
+});
+
+// ============ SHOW QUESTION ============
+function showQuestion() {
+  const q = questions[currentQ];
+  questionNumber.textContent = `Pertanyaan ${currentQ + 1} dari ${questions.length}`;
+  questionText.textContent = q.q;
+  optionsContainer.innerHTML = '';
+  feedback.className = '';
+  feedback.textContent = '';
+  nextBtn.style.display = 'none';
+
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = `${String.fromCharCode(65 + idx)}. ${opt}`;
+    btn.onclick = () => selectAnswer(idx, btn);
+    optionsContainer.appendChild(btn);
+  });
+}
+
+// ============ SELECT ANSWER ============
+function selectAnswer(idx, btn) {
+  const q = questions[currentQ];
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  if (idx === q.correct) {
+    btn.classList.add('correct');
+    feedback.className = 'correct';
+    feedback.innerHTML = `✅ <strong>BENAR!</strong> Motor melaju! ${q.explain}`;
+    correct++;
+    score += 10;
+    motorcycleRun();
+  } else {
+    btn.classList.add('wrong');
+    allBtns[q.correct].classList.add('correct');
+    feedback.className = 'wrong';
+    feedback.innerHTML = `❌ <strong>SALAH!</strong> Motor MOGOK! ${q.explain}`;
+    wrong++;
+    motorcycleMogok();
+  }
+
+  correctCountEl.textContent = correct;
+  wrongCountEl.textContent = wrong;
+  scoreEl.textContent = score;
+  updateProgress();
+
+  nextBtn.style.display = 'inline-block';
+  nextBtn.textContent = currentQ < questions.length - 1 ? 'Lanjut Perjalanan →' : '🏁 Lihat Hasil';
+}
+
+// ============ MOTORCYCLE ANIMATIONS ============
+function motorcycleRun() {
+  isMogok = false;
+  motorcycle.classList.remove('mogok', 'shake');
+  smokes.forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.wheel').forEach(w => w.classList.add('spinning'));
+
+  // Move motorcycle forward (visual)
+  motorcyclePos = Math.min(70, motorcyclePos + 2);
+  motorcycle.style.left = motorcyclePos + '%';
+  motorcycle.style.transition = 'left 1s ease-out';
+
+  // Speed lines effect
+  setTimeout(() => {
+    motorcycle.style.transition = 'left 0.5s';
+  }, 1000);
+}
+
+function motorcycleMogok() {
+  isMogok = true;
+  motorcycle.classList.add('mogok', 'shake');
+  document.querySelectorAll('.wheel').forEach(w => w.classList.remove('spinning'));
+
+  // Activate smoke
+  smokes.forEach((s, i) => {
+    setTimeout(() => s.classList.add('active'), i * 200);
+  });
+
+  // Stop smoke after 2s
+  setTimeout(() => {
+    smokes.forEach(s => s.classList.remove('active'));
+  }, 2500);
+}
+
+// ============ UPDATE PROGRESS ============
+function updateProgress() {
+  const percent = (correct / questions.length) * 100;
+  progressBar.style.width = percent + '%';
+  progressText.textContent = `${correct} / ${questions.length} (Benar)`;
+}
+
+// ============ NEXT QUESTION ============
+nextBtn.addEventListener('click', () => {
+  currentQ++;
+  if (currentQ < questions.length) {
+    showQuestion();
+    // Reset motorcycle position for next question
+    if (!isMogok) {
+      motorcyclePos = 15;
+      motorcycle.style.left = motorcyclePos + '%';
+    }
+  } else {
+    endGame();
+  }
+});
+
+// ============ END GAME ============
+function endGame() {
+  questionPanel.classList.add('hidden');
+  endScreen.classList.add('show');
+
+  document.getElementById('finalCorrect').textContent = correct;
+  document.getElementById('finalWrong').textContent = wrong;
+  document.getElementById('finalScore').textContent = score;
+
+  const finalMsg = document.getElementById('finalMessage');
+  const endTitle = document.getElementById('endTitle');
+
+  if (correct === questions.length) {
+    endTitle.textContent = '🏆 LUAR BIASA! SAMPAI TUJUAN!';
+    finalMsg.textContent = 'Sempurna! Kamu menguasai materi kopling dengan baik!';
+    finalMsg.style.color = '#4CAF50';
+  } else if (correct >= 25) {
+    endTitle.textContent = '🏁 HEBAT! Hampir Sampai!';
+    finalMsg.textContent = `Kamu hampir sampai! Terus belajar ya!`;
+    finalMsg.style.color = '#8BC34A';
+  } else if (correct >= 15) {
+    endTitle.textContent = '🚧 Mogok di Tengah Jalan';
+    finalMsg.textContent = 'Perjalananmu terhambat. Pelajari lagi materi kopling!';
+    finalMsg.style.color = '#FFC107';
+  } else {
+    endTitle.textContent = '💥 Motor Mogok Parah!';
+    finalMsg.textContent = 'Kamu perlu belajar ulang komponen kopling. Semangat!';
+    finalMsg.style.color = '#f44336';
+  }
+}
+
+// ============ RESTART ============
+restartBtn.addEventListener('click', () => {
+  currentQ = 0;
+  correct = 0;
+  wrong = 0;
+  score = 0;
+  motorcyclePos = 15;
+  motorcycle.style.left = motorcyclePos + '%';
+  motorcycle.classList.remove('mogok', 'shake');
+
+  correctCountEl.textContent = 0;
+  wrongCountEl.textContent = 0;
+  scoreEl.textContent = 0;
+  progressBar.style.width = '0%';
+  progressText.textContent = '0 / 30';
+
+  endScreen.classList.remove('show');
+  questionPanel.classList.remove('hidden');
+  showQuestion();
+});
+</script>
+
+</body>
+</html>
