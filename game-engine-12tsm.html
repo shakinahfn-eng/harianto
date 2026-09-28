@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Perjalanan Engine Motor - SMK Kelas 12</title>
+  <style>
+    :root {
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --red: #dc2626;
+      --dark: #1f2937;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #e0f2fe, #f0fdf4);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .hero-card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+      max-width: 760px;
+      margin: 40px auto;
+      text-align: center;
+    }
+
+    .emoji-big {
+      font-size: clamp(3rem, 10vw, 5rem);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 20px;
+    }
+
+    .rules {
+      text-align: left;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+
+    .rules h3 {
+      margin: 0 0 10px;
+    }
+
+    .rules ul {
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.7;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--blue);
+      color: white;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .btn.big {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+    }
+
+    .btn.secondary {
+      background: #334155;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border-radius: 18px;
+      padding: 12px 16px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    .brand {
+      font-weight: 900;
+      font-size: 1.1rem;
+    }
+
+    .hud {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .status {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    .status.ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status.stall {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status.ready {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .icon-btn {
+      border: none;
+      background: #f1f5f9;
+      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .progress {
+      height: 14px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 14px 0;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #86efac);
+      transition: width 0.6s ease;
+    }
+
+    .scene {
+      position: relative;
+      height: 280px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #7dd3fc 0%, #bae6fd 55%, #86efac 55%, #22c55e 100%);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
+      margin-bottom: 16px;
+    }
+
+    .sun {
+      position: absolute;
+      top: 22px;
+      right: 34px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff7ed, #fbbf24 60%, #f59e0b);
+      box-shadow: 0 0 35px rgba(251, 191, 36, 0.65);
+    }
+
+    .cloud {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0.95;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.08));
+      animation: cloudMove 24s linear infinite;
+    }
+
+    .c1 {
+      top: 28px;
+      left: 5%;
+    }
+
+    .c2 {
+      top: 68px;
+      left: 48%;
+      animation-duration: 31s;
+    }
+
+    .tree {
+      position: absolute;
+      font-size: 2.4rem;
+      bottom: 92px;
+      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.15));
+    }
+
+    .t1 {
+      left: 8%;
+    }
+
+    .t2 {
+      right: 16%;
+      font-size: 2rem;
+    }
+
+    @keyframes cloudMove {
+      0% {
+        transform: translateX(-120px);
+      }
+      100% {
+        transform: translateX(calc(100vw + 120px));
+      }
+    }
+
+    .road {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 28px;
+      height: 100px;
+      background: linear-gradient(180deg, #52525b 0%, #3f3f46 45%, #27272a 100%);
+      border-top: 6px solid #a1a1aa;
+      border-bottom: 6px solid #18181b;
+    }
+
+    .center-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 8px;
+      transform: translateY(-50%);
+      background-image: repeating-linear-gradient(
+        90deg,
+        #facc15 0px,
+        #facc15 45px,
+        transparent 45px,
+        transparent 90px
+      );
+      background-size: 90px 100%;
+      opacity: 0.95;
+    }
+
+    .scene.moving .center-line {
+      animation: roadMove 0.55s linear infinite;
+    }
+
+    @keyframes roadMove {
+      from {
+        background-position-x: 0;
+      }
+      to {
+        background-position-x: -90px;
+      }
+    }
+
+    .station {
+      position: absolute;
+      bottom: 12px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      border: 3px solid #22c55e;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      z-index: 2;
+    }
+
+    .station.reached {
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.22);
+    }
+
+    .finish {
+      position: absolute;
+      right: 2%;
+      bottom: 18px;
+      text-align: center;
+      color: white;
+      font-size: 2rem;
+      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.55);
+      z-index: 2;
+    }
+
+    .finish span {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .moto {
+      position: absolute;
+      bottom: 8px;
+      left: 5%;
+      transform: translateX(-50%);
+      font-size: clamp(2.4rem, 7vw, 3.5rem);
+      line-height: 1;
+      transition: left 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .rider {
+      font-size: 0.68em;
+      margin-bottom: -0.42em;
+      z-index: 2;
+    }
+
+    .bike {
+      display: block;
+      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
+    }
+
+    .smoke {
+      position: absolute;
+      top: -0.1em;
+      right: -0.55em;
+      font-size: 0.7em;
+      opacity: 0;
+    }
+
+    .moto.moving .bike {
+      animation: bikeBounce 0.3s ease-in-out 3;
+    }
+
+    @keyframes bikeBounce {
+      0%, 100% {
+        transform: translateY(0) rotate(0);
+      }
+      50% {
+        transform: translateY(-5px) rotate(-2deg);
+      }
+    }
+
+    .moto.stalled {
+      animation: stallShake 0.4s ease-in-out 4;
+    }
+
+    .moto.stalled .smoke {
+      animation: puff 1s ease-out infinite;
+    }
+
+    @keyframes stallShake {
+      0%, 100% {
+        transform: translateX(-50%) rotate(0);
+      }
+      25% {
+        transform: translateX(-53%) rotate(-5deg);
+      }
+      75% {
+        transform: translateX(-47%) rotate(5deg);
+      }
+    }
+
+    @keyframes puff {
+      0% {
+        opacity: 0.85;
+        transform: translateY(0) scale(0.8);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-28px) scale(1.7);
+      }
+    }
+
+    .question-card {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 16px 35px rgba(15, 23, 42, 0.10);
+    }
+
+    .qmeta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    #questionText {
+      margin: 0 0 16px;
+      font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+      line-height: 1.45;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      background: white;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+      transition: 0.18s;
+    }
+
+    .option:hover:not(:disabled) {
+      border-color: #60a5fa;
+      background: #eff6ff;
+      transform: translateY(-1px);
+    }
+
+    .option:disabled {
+      cursor: not-allowed;
+      opacity: 0.9;
+    }
+
+    .letter {
+      flex: 0 0 auto;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #111827;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .option.correct {
+      border-color: var(--green);
+      background: #dcfce7;
+    }
+
+    .option.correct .letter {
+      background: var(--green);
+    }
+
+    .option.wrong {
+      border-color: var(--red);
+      background: #fee2e2;
+      animation: shakeBtn 0.35s ease-in-out;
+    }
+
+    .option.wrong .letter {
+      background: var(--red);
+    }
+
+    @keyframes shakeBtn {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-5px);
+      }
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    .feedback {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      line-height: 1.5;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.success {
+      background: #dcfce7;
+      border-left: 6px solid var(--green);
+    }
+
+    .feedback.error {
+      background: #fee2e2;
+      border-left: 6px solid var(--red);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .result-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stat-box span {
+      display: block;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .stat-box strong {
+      font-size: 1.05rem;
+    }
+
+    @media (max-width: 760px) {
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .result-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .scene {
+        height: 240px;
+      }
+
+      .road {
+        height: 88px;
+        bottom: 22px;
+      }
+
+      .tree {
+        bottom: 82px;
+      }
+
+      .hud {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- LAYAR AWAL -->
+    <section id="startScreen" class="screen active">
+      <div class="hero-card">
+        <div class="emoji-big">🏍️🧑‍🎓</div>
+        <h1>Perjalanan Engine Motor</h1>
+        <p class="subtitle">Game pengenalan komponen engine sepeda motor untuk SMK Kelas 12</p>
+
+        <div class="rules">
+          <h3>Aturan permainan</h3>
+          <ul>
+            <li>Ada <b>30 soal</b> seputar komponen engine sepeda motor.</li>
+            <li>Jika jawaban <b>benar</b>, motor maju satu checkpoint.</li>
+            <li>Jika jawaban <b>salah</b>, motor <b>mogok</b> dan harus diperbaiki dengan mencoba lagi.</li>
+            <li>Pengendara adalah siswa. Semua soal harus dijawab benar agar sampai tujuan.</li>
+          </ul>
+        </div>
+
+        <label for="playerName">Nama siswa / pengendara</label>
+        <input id="playerName" type="text" placeholder="Contoh: Andi" maxlength="24" />
+
+        <button id="startBtn" class="btn big">Mulai Perjalanan 🚀</button>
+      </div>
+    </section>
+
+    <!-- LAYAR GAME -->
+    <section id="gameScreen" class="screen">
+      <div class="topbar">
+        <div class="brand">🏍️ Engine Ride</div>
+        <div class="hud">
+          <span id="playerLabel" class="pill">Pengendara: Siswa</span>
+          <span id="distanceLabel" class="pill">Checkpoint: 0/30</span>
+          <span id="scoreLabel" class="pill">Benar sekali coba: 0/30</span>
+          <span id="wrongLabel" class="pill">Mogok: 0</span>
+          <span id="statusLabel" class="status ok">Status: Siap jalan</span>
+          <button id="soundBtn" class="icon-btn" title="Nyalakan/matikan suara">🔊</button>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div id="progressFill"></div>
+      </div>
+
+      <div id="scene" class="scene">
+        <div class="sun"></div>
+        <div class="cloud c1">☁️</div>
+        <div class="cloud c2">☁️</div>
+        <div class="tree t1">🌳</div>
+        <div class="tree t2">🌲</div>
+
+        <div class="road">
+          <div class="center-line"></div>
+          <div id="stations"></div>
+
+          <div class="finish">
+            🏁
+            <span>Tujuan</span>
+          </div>
+
+          <div id="moto" class="moto">
+            <span class="rider">🧑‍🎓</span>
+            <span class="bike">🏍️</span>
+            <span class="smoke">💨</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="qmeta">
+          <span id="qNumber">Soal 1 / 30</span>
+          <span class="hint">Pilih satu jawaban</span>
+        </div>
+
+        <h2 id="questionText">Memuat soal...</h2>
+
+        <div id="options" class="options"></div>
+
+        <div id="feedback" class="feedback"></div>
+
+        <div class="controls">
+          <button id="nextBtn" class="btn hidden">Lanjut ➜</button>
+          <button id="repairBtn" class="btn secondary hidden">Perbaiki Motor 🔧</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAYAR AKHIR -->
+    <section id="endScreen" class="screen">
+      <div class="hero-card">
+        <div class="emoji-big">🏁️</div>
+        <h1>Sampai di Tujuan!</h1>
+        <p id="endMessage"></p>
+
+        <div id="resultStats" class="result-stats"></div>
+
+        <button id="restartBtn" class="btn big">Main Lagi 🔁</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /*
+      =========================================================
+      DAFTAR 30 PERTANYAAN KOMPONEN ENGINE SEPEDA MOTOR
+      Guru dapat mengubah soal, pilihan, jawaban, dan penjelasan
+      pada array QUESTIONS di bawah ini.
+      =========================================================
+    */
+    const QUESTIONS = [
+      // 1
+      {
+        q: "Komponen engine yang mengubah gerakan naik-turun piston menjadi gerakan putar adalah ....",
+        options: ["Camshaft", "Piston ring", "Crankshaft", "Rocker arm"],
+        answer: 2,
+        explain: "Crankshaft atau poros engkol mengubah gerak bolak-balik piston menjadi gerak putar untuk menggerakkan transmisi."
+      },
+      // 2
+      {
+        q: "Komponen yang menghasilkan bunga api untuk membakar campuran udara dan bahan bakar di ruang bakar adalah ....",
+        options: ["Busi", "Koil", "Spul", "Aki"],
+        answer: 0,
+        explain: "Busi memercikkan bunga api bertegangan tinggi untuk memulai pembakaran."
+      },
+      // 3
+      {
+        q: "Poros yang mengatur waktu pembukaan dan penutupan katup masuk serta katup buang adalah ....",
+        options: ["Crankshaft", "Camshaft", "Output shaft", "Counter shaft"],
+        answer: 1,
+        explain: "Camshaft memiliki tonjolan atau cam yang membuka katup sesuai timing mesin."
+      },
+      // 4
+      {
+        q: "Ruang tempat terjadinya pembakaran campuran udara dan bahan bakar disebut ....",
+        options: ["Carter", "Muffler", "Intake manifold", "Combustion chamber"],
+        answer: 3,
+        explain: "Combustion chamber atau ruang bakar adalah tempat campuran dibakar oleh bunga api."
+      },
+      // 5
+      {
+        q: "Komponen yang berfungsi menyaring udara sebelum masuk ke karburator atau throttle body adalah ....",
+        options: ["Oil filter", "Air filter", "Fuel filter", "Cabin filter"],
+        answer: 1,
+        explain: "Air filter mencegah debu dan kotoran masuk ke sistem induksi mesin."
+      },
+      // 6
+      {
+        q: "Fungsi utama piston ring adalah ....",
+        options: [
+          "Menahan kompresi, mengontrol oli, dan membantu pendinginan piston",
+          "Mengatur campuran bahan bakar",
+          "Membuka dan menutup katup",
+          "Membangkitkan arus listrik"
+        ],
+        answer: 0,
+        explain: "Piston ring merapatkan celah piston-silinder, mengontrol oli, dan membantu transfer panas."
+      },
+      // 7
+      {
+        q: "Komponen yang menghubungkan piston dengan crankshaft adalah ....",
+        options: ["Cam chain", "Valve spring", "Connecting rod", "Thermostat"],
+        answer: 2,
+        explain: "Connecting rod atau setang seher meneruskan gaya piston ke crankshaft."
+      },
+      // 8
+      {
+        q: "Sistem bahan bakar yang menyemprotkan bensin sesuai perintah ECU adalah ....",
+        options: ["Karburator", "Pompa manual", "Choke system", "Fuel injection"],
+        answer: 3,
+        explain: "Fuel injection menggunakan injector yang dikontrol ECU berdasarkan data sensor."
+      },
+      // 9
+      {
+        q: "Komponen yang membangkitkan arus listrik untuk sistem pengapian dan pengisian adalah ....",
+        options: ["Regulator rectifier", "Spul/magneto coil", "Sekring", "Relay starter"],
+        answer: 1,
+        explain: "Spul atau magneto coil membangkitkan tegangan ketika rotor magnet berputar."
+      },
+      // 10
+      {
+        q: "Komponen yang mendinginkan cairan pendingin dengan membuang panas ke udara adalah ....",
+        options: ["Water pump", "Thermostat", "Radiator", "Oil cooler"],
+        answer: 2,
+        explain: "Radiator melepaskan panas coolant ke udara agar suhu mesin stabil."
+      },
+      // 11
+      {
+        q: "Pada motor karburator, komponen yang mencampurkan udara dan bahan bakar sebelum masuk ruang bakar adalah ....",
+        options: ["Karburator", "Throttle body", "Injector", "ECU"],
+        answer: 0,
+        explain: "Karburator mencampur udara dan bensin secara mekanis sebelum masuk silinder."
+      },
+      // 12
+      {
+        q: "Komponen yang menyimpan energi putar agar putaran mesin lebih halus adalah ....",
+        options: ["Piston", "Clutch plate", "Spark plug", "Flywheel/magnet rotor"],
+        answer: 3,
+        explain: "Flywheel menyimpan inertia rotasi sehingga mesin tidak tersendat antar langkah."
+      },
+      // 13
+      {
+        q: "Katup yang membuka pada langkah hisap untuk memasukkan campuran udara-bahan bakar adalah ....",
+        options: ["Katup buang", "Katup masuk", "Reed valve", "Pressure valve"],
+        answer: 1,
+        explain: "Intake valve membuka saat piston turun untuk menghisap campuran."
+      },
+      // 14
+      {
+        q: "Katup yang membuka pada langkah buang untuk mengeluarkan gas sisa pembakaran adalah ....",
+        options: ["Exhaust valve", "Intake valve", "Idle port", "Throttle plate"],
+        answer: 0,
+        explain: "Exhaust valve membuka saat piston naik untuk mendorong gas buang."
+      },
+      // 15
+      {
+        q: "Komponen yang meneruskan gerakan camshaft ke batang katup adalah ....",
+        options: ["Piston pin", "Crankshaft", "Rocker arm", "Oil pump"],
+        answer: 2,
+        explain: "Rocker arm atau tuas katup meneruskan dorongan camshaft ke valve."
+      },
+      // 16
+      {
+        q: "Fungsi utama oli mesin pada sepeda motor adalah ....",
+        options: [
+          "Menyimpan listrik",
+          "Melumasi, mendinginkan, membersihkan, dan melindungi komponen",
+          "Mengatur timing katup",
+          "Membakar bahan bakar"
+        ],
+        answer: 1,
+        explain: "Oli mengurangi gesekan, membantu pendinginan, membawa kotoran, dan mencegah karat."
+      },
+      // 17
+      {
+        q: "Komponen yang menyaring kotoran pada oli sirkulasi adalah ....",
+        options: ["Air filter", "Fuel pump", "Radiator cap", "Oil filter"],
+        answer: 3,
+        explain: "Oil filter menjaga oli tetap bersih agar pelumasan mesin optimal."
+      },
+      // 18
+      {
+        q: "Sistem kopling berfungsi untuk ....",
+        options: [
+          "Menghubungkan dan memutuskan tenaga mesin ke transmisi",
+          "Mengubah campuran udara",
+          "Mendinginkan cairan pendingin",
+          "Menghasilkan bunga api"
+        ],
+        answer: 0,
+        explain: "Kopling memungkinkan perpindahan gigi halus dengan memutus tenaga sementara."
+      },
+      // 19
+      {
+        q: "Transmisi atau gearbox pada motor berfungsi untuk ....",
+        options: [
+          "Menyimpan oli",
+          "Mengatur suhu coolant",
+          "Mengubah perbandingan gigi sesuai kebutuhan tenaga dan kecepatan",
+          "Menyalakan busi"
+        ],
+        answer: 2,
+        explain: "Transmisi mengatur torsi dan kecepatan melalui kombinasi gear."
+      },
+      // 20
+      {
+        q: "Komponen yang menggerakkan crankshaft saat mesin pertama kali dihidupkan adalah ....",
+        options: ["Alternator", "Motor starter", "Water pump", "Fuel gauge"],
+        answer: 1,
+        explain: "Motor starter mengubah energi listrik menjadi putaran awal untuk menghidupkan mesin."
+      },
+      // 21
+      {
+        q: "ECU pada sistem injeksi berfungsi sebagai ....",
+        options: [
+          "Penyaring udara",
+          "Muffler",
+          "Aki kering",
+          "Otak elektronik yang mengolah data sensor dan mengontrol injektor serta pengapian"
+        ],
+        answer: 3,
+        explain: "ECU membaca sensor lalu mengatur timing pengapian dan volume bahan bakar."
+      },
+      // 22
+      {
+        q: "Sensor yang mendeteksi posisi atau putaran crankshaft untuk menentukan waktu pengapian adalah ....",
+        options: ["CKP sensor", "TPS sensor", "IAT sensor", "O2 sensor"],
+        answer: 0,
+        explain: "Crankshaft Position Sensor memberi sinyal putaran dan posisi poros engkol ke ECU."
+      },
+      // 23
+      {
+        q: "Komponen yang membuka dan menutup aliran coolant berdasarkan suhu mesin adalah ....",
+        options: ["Radiator fan", "Water pump", "Thermostat", "Coolant reservoir"],
+        answer: 2,
+        explain: "Thermostat menutup saat mesin dingin dan membuka ketika suhu naik agar mesin cepat hangat."
+      },
+      // 24
+      {
+        q: "Gasket digunakan untuk ....",
+        options: [
+          "Mengatur putaran mesin",
+          "Mencegah kebocoran oli, coolant, atau kompresi di antara komponen yang bertemu",
+          "Menyemprot bahan bakar",
+          "Meredam suara knalpot"
+        ],
+        answer: 1,
+        explain: "Gasket menjadi perapat antara dua permukaan logam agar tidak bocor."
+      },
+      // 25
+      {
+        q: "Bearing atau laher berfungsi ....",
+        options: [
+          "Menyaring bensin",
+          "Membuka katup",
+          "Menyimpan energi listrik",
+          "Mempermudah putaran poros dan mengurangi gesekan"
+        ],
+        answer: 3,
+        explain: "Bearing mendukung poros berputar lancar dengan gesekan rendah."
+      },
+      // 26
+      {
+        q: "Throttle body pada motor injeksi berfungsi mengatur ....",
+        options: [
+          "Jumlah udara masuk sesuai bukaan gas",
+          "Tekanan oli",
+          "Suhu radiator",
+          "Suara knalpot"
+        ],
+        answer: 0,
+        explain: "Throttle body membuka sesuai putaran grip gas untuk mengatur udara masuk."
+      },
+      // 27
+      {
+        q: "Muffler atau knalpot berfungsi ....",
+        options: [
+          "Menyaring udara",
+          "Mendinginkan piston",
+          "Meredam suara gas buang dan mengarahkannya keluar",
+          "Menghasilkan listrik"
+        ],
+        answer: 2,
+        explain: "Muffler menurunkan kebisingan gas buang dan mengarahkannya ke luar mesin."
+      },
+      // 28
+      {
+        q: "Cylinder head berfungsi ....",
+        options: [
+          "Menyimpan bahan bakar",
+          "Menutup bagian atas silinder serta menampung katup, busi, dan ruang bakar",
+          "Menggerakkan roda belakang",
+          "Mendinginkan oli"
+        ],
+        answer: 1,
+        explain: "Cylinder head menutup silinder dan menjadi tempat komponen distribusi gas serta pengapian."
+      },
+      // 29
+      {
+        q: "Timing chain atau cam chain berfungsi ....",
+        options: [
+          "Mengatur campuran bensin",
+          "Meredam getaran roda",
+          "Mengisi aki",
+          "Menghubungkan crankshaft ke camshaft agar waktu katup sinkron"
+        ],
+        answer: 3,
+        explain: "Timing chain menjaga sinkronisasi poros engkol dan camshaft."
+      },
+      // 30
+      {
+        q: "Urutan langkah mesin 4 tak yang benar adalah ....",
+        options: [
+          "Buang - Hisap - Kompresi - Tenaga",
+          "Hisap - Kompresi - Tenaga - Buang",
+          "Kompresi - Buang - Hisap - Tenaga",
+          "Tenaga - Hisap - Buang - Kompresi"
+        ],
+        answer: 1,
+        explain: "Mesin 4 tak bekerja dengan urutan intake, compression, power, exhaust."
+      }
+    ];
+
+    const TOTAL = QUESTIONS.length;
+
+    const els = {
+      startScreen: document.getElementById("startScreen"),
+      gameScreen: document.getElementById("gameScreen"),
+      endScreen: document.getElementById("endScreen"),
+
+      playerName: document.getElementById("playerName"),
+      startBtn: document.getElementById("startBtn"),
+
+      playerLabel: document.getElementById("playerLabel"),
+      distanceLabel: document.getElementById("distanceLabel"),
+      scoreLabel: document.getElementById("scoreLabel"),
+      wrongLabel: document.getElementById("wrongLabel"),
+      statusLabel: document.getElementById("statusLabel"),
+      soundBtn: document.getElementById("soundBtn"),
+      progressFill: document.getElementById("progressFill"),
+
+      scene: document.getElementById("scene"),
+      stations: document.getElementById("stations"),
+      moto: document.getElementById("moto"),
+
+      qNumber: document.getElementById("qNumber"),
+      questionText: document.getElementById("questionText"),
+      options: document.getElementById("options"),
+      feedback: document.getElementById("feedback"),
+      nextBtn: document.getElementById("nextBtn"),
+      repairBtn: document.getElementById("repairBtn"),
+
+      endMessage: document.getElementById("endMessage"),
+      resultStats: document.getElementById("resultStats"),
+      restartBtn: document.getElementById("restartBtn")
+    };
+
+    let state = resetState();
+    let soundOn = true;
+    let audioCtx = null;
+
+    function resetState() {
+      return {
+        name: "Siswa",
+        index: 0,
+        solved: 0,
+        firstTry: 0,
+        wrong: 0,
+        attemptUsed: false,
+        locked: false,
+        currentOrder: null
+      };
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+      document.getElementById(screenId).classList.add("active");
+    }
+
+    function stationPos(checkpoint) {
+      const start = 5;
+      const end = 91;
+      return start + (checkpoint / TOTAL) * (end - start);
+    }
+
+    function buildStations() {
+      els.stations.innerHTML = "";
+      for (let i = 1; i <= TOTAL; i++) {
+        const el = document.createElement("div");
+        el.className = "station";
+        el.style.left = stationPos(i) + "%";
+        el.title = "Checkpoint " + i;
+        els.stations.appendChild(el);
+      }
+    }
+
+    function updateStats() {
+      els.distanceLabel.textContent = `Checkpoint: ${state.solved}/${TOTAL}`;
+      els.scoreLabel.textContent = `Benar sekali coba: ${state.firstTry}/${TOTAL}`;
+      els.wrongLabel.textContent = `Mogok: ${state.wrong}`;
+      els.progressFill.style.width = `${(state.solved / TOTAL) * 100}%`;
+    }
+
+    function updateMoto(animate = false) {
+      const pos = stationPos(state.solved);
+      els.moto.style.left = `${pos}%`;
+
+      const stationEls = els.stations.querySelectorAll(".station");
+      stationEls.forEach((el, idx) => {
+        el.classList.toggle("reached", idx < state.solved);
+      });
+
+      updateStats();
+
+      if (animate) {
+        els.scene.classList.add("moving");
+        els.moto.classList.add("moving");
+
+        setTimeout(() => {
+          els.scene.classList.remove("moving");
+          els.moto.classList.remove("moving");
+        }, 900);
+      }
+    }
+
+    function setStatus(text, type = "ok") {
+      els.statusLabel.textContent = `Status: ${text}`;
+      els.statusLabel.className = `status ${type}`;
+    }
+
+    function showFeedback(type, html) {
+      els.feedback.className = `feedback show ${type}`;
+      els.feedback.innerHTML = html;
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[state.index];
+
+      state.attemptUsed = false;
+      state.locked = false;
+      state.currentOrder = shuffle([0, 1, 2, 3]);
+
+      els.qNumber.textContent = `Soal ${state.index + 1} / ${TOTAL}`;
+      els.questionText.textContent = q.q;
+      els.options.innerHTML = "";
+
+      state.currentOrder.forEach((origIdx, displayIdx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "option";
+        btn.dataset.orig = String(origIdx);
+        btn.innerHTML = `
+          <span class="letter">${String.fromCharCode(65 + displayIdx)}</span>
+          <span>${q.options[origIdx]}</span>
+        `;
+        btn.addEventListener("click", () => selectOption(btn));
+        els.options.appendChild(btn);
+      });
+
+      els.feedback.className = "feedback";
+      els.feedback.innerHTML = "";
+      els.nextBtn.classList.add("hidden");
+      els.repairBtn.classList.add("hidden");
+      els.moto.classList.remove("stalled");
+
+      setStatus("Siap jalan", "ok");
+    }
+
+    function selectOption(btn) {
+      if (state.locked) return;
+
+      const q = QUESTIONS[state.index];
+      const orig = Number(btn.dataset.orig);
+      const buttons = Array.from(els.options.querySelectorAll(".option"));
+
+      if (orig === q.answer) {
+        state.locked = true;
+        buttons.forEach((b) => (b.disabled = true));
+        btn.classList.add("correct");
+
+        if (!state.attemptUsed) {
+          state.firstTry += 1;
+        }
+
+        state.solved += 1;
+        updateMoto(true);
+
+        showFeedback("success", `✅ Benar! ${q.explain}`);
+
+        if (state.index === TOTAL - 1) {
+          els.nextBtn.textContent = "Selesai di Tujuan 🏁";
+        } else {
+          els.nextBtn.textContent = "Lanjut ➜";
+        }
+
+        els.nextBtn.classList.remove("hidden");
+        setStatus("Mesin menyala", "ok");
+        playCorrect();
+      } else {
+        state.locked = true;
+        state.attemptUsed = true;
+        state.wrong += 1;
+
+        buttons.forEach((b) => (b.disabled = true));
+        btn.classList.add("wrong");
+
+        showFeedback(
+          "error",
+          "❌ Jawaban belum tepat. Motor mogok! Klik “Perbaiki Motor” lalu coba lagi."
+        );
+
+        els.repairBtn.classList.remove("hidden");
+        setStatus("Mogok!", "stall");
+        els.moto.classList.add("stalled");
+
+        updateStats();
+        playWrong();
+      }
+    }
+
+    function repairMotor() {
+      state.locked = false;
+
+      els.moto.classList.remove("stalled");
+      els.feedback.className = "feedback";
+      els.feedback.innerHTML = "";
+      els.repairBtn.classList.add("hidden");
+
+      Array.from(els.options.querySelectorAll(".option")).forEach((b) => {
+        b.disabled = false;
+        b.classList.remove("wrong");
+      });
+
+      setStatus("Motor diperbaiki, coba lagi", "ready");
+    }
+
+    function nextQuestion() {
+      if (state.index < TOTAL - 1) {
+        state.index += 1;
+        renderQuestion();
+      } else {
+        finishGame();
+      }
+    }
+
+    function finishGame() {
+      showScreen("endScreen");
+
+      const perfect = state.wrong === 0;
+      const percent = Math.round((state.firstTry / TOTAL) * 100);
+
+      let predicate;
+      if (perfect) {
+        predicate = "🏆 Sempurna! Kamu tidak pernah mogok.";
+      } else if (state.firstTry >= 27) {
+        predicate = "🥇 Sangat baik, tinggal sedikit lagi sempurna.";
+      } else if (state.firstTry >= 21) {
+        predicate = "🥈 Baik, penguasaan komponen engine sudah bagus.";
+      } else if (state.firstTry >= 15) {
+        predicate = "🥉 Cukup, terus pelajari fungsi tiap komponen.";
+      } else {
+        predicate = "Perlu latihan lagi, jangan menyerah!";
+      }
+
+      els.endMessage.textContent = `Selamat ${state.name}, motor berhasil sampai tujuan setelah melewati ${TOTAL} checkpoint.`;
+
+      els.resultStats.innerHTML = `
+        <div class="stat-box">
+          <span>Jarak tempuh</span>
+          <strong>${state.solved}/${TOTAL} checkpoint</strong>
+        </div>
+        <div class="stat-box">
+          <span>Benar sekali coba</span>
+          <strong>${state.firstTry}/${TOTAL} (${percent}%)</strong>
+        </div>
+        <div class="stat-box">
+          <span>Jumlah mogok</span>
+          <strong>${state.wrong} kali</strong>
+        </div>
+        <div class="stat-box">
+          <span>Predikat</span>
+          <strong>${predicate}</strong>
+        </div>
+      `;
+    }
+
+    function startGame() {
+      const name = els.playerName.value.trim() || "Siswa";
+
+      state = resetState();
+      state.name = name;
+
+      els.playerLabel.textContent = `Pengendara: ${name}`;
+
+      showScreen("gameScreen");
+      updateMoto(false);
+      renderQuestion();
+      setStatus("Mesin hidup", "ok");
+
+      if (soundOn) {
+        const ctx = getCtx();
+        if (ctx && ctx.state === "suspended") {
+          ctx.resume();
+        }
+      }
+    }
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      els.soundBtn.textContent = soundOn ? "🔊" : "🔇";
+
+      if (soundOn) {
+        const ctx = getCtx();
+        if (ctx && ctx.state === "suspended") {
+          ctx.resume();
+        }
+      }
+    }
+
+    function getCtx() {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) {
+          audioCtx = new AC();
+        }
+      }
+      return audioCtx;
+    }
+
+    function tone(freq, dur, type = "sine", vol = 0.04, delay = 0) {
+      if (!soundOn) return;
+
+      const ctx = getCtx();
+      if (!ctx) return;
+
+      const t = ctx.currentTime + delay;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(vol, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + dur + 0.02);
+    }
+
+    function playCorrect() {
+      tone(660, 0.12, "triangle", 0.04, 0);
+      tone(880, 0.16, "triangle", 0.04, 0.12);
+    }
+
+    function playWrong() {
+      tone(220, 0.18, "sawtooth", 0.05, 0);
+      tone(140, 0.25, "sawtooth", 0.05, 0.16);
+    }
+
+    function init() {
+      buildStations();
+
+      els.startBtn.addEventListener("click", startGame);
+      els.nextBtn.addEventListener("click", nextQuestion);
+      els.repairBtn.addEventListener("click", repairMotor);
+      els.soundBtn.addEventListener("click", toggleSound);
+
+      els.restartBtn.addEventListener("click", () => {
+        state = resetState();
+        els.playerName.value = "";
+        showScreen("startScreen");
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
